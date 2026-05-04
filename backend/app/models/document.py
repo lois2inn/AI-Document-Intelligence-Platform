@@ -13,8 +13,14 @@ class Document(Base):
     source_type: Mapped[str] = mapped_column(
         String(50), nullable=False, default="note"
     )  # 'file', 'url', 'manual'
+    
     raw_text: Mapped[str | None] = mapped_column(Text, nullable=True)
     cleaned_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    
+    file_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    file_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    content_type: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="PENDING")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     

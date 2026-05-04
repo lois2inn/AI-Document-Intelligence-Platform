@@ -1,5 +1,6 @@
 import time
 from datetime import datetime
+from pathlib import Path
 
 from app.db.session import SessionLocal
 from app.models.document import Document
@@ -33,9 +34,7 @@ def process_document_job(document_id: int, job_id: int) -> None:
 
         print("[TASK] Moved to EXTRACTING")
 
-        # "Extract" text for current MVP
-        # Since your current input is raw_text, extraction is simply reading it
-        extracted_text = document.raw_text or ""
+        extracted_text = extract_text_from_document(document)
 
         # Move to cleaning stage
         job.stage = JobStage.CLEANING.value
@@ -56,10 +55,6 @@ def process_document_job(document_id: int, job_id: int) -> None:
         print("[TASK] Moved to CHUNKING")
 
         chunks = chunk_text(cleaned_text, chunk_size=300, overlap=50)
-
-        # Optional: clear old chunks if reprocessing
-        db.query(DocumentChunk).filter(DocumentChunk.document_id == document.id).delete()
-        db.commit()
 
         for index, chunk in enumerate(chunks):
             db.add(
@@ -101,3 +96,21 @@ def process_document_job(document_id: int, job_id: int) -> None:
 
     finally:
         db.close()
+    
+# For now, this supports .txt uploads well. PDF extraction can come next.
+def extract_text_from_document(document: Document) -> str:
+    if document.raw_text:
+        return document.raw_text
+
+    if document.file_path:
+        path = Path(document.file_path)
+
+        if not path.exists():
+            raise FileNotFoundError(f"Uploaded file not found: {document.file_path}")
+
+        if document.content_type and "text" in document.content_type:
+            return path.read_text(encoding="utf-8")
+
+        return f"File uploaded: {document.file_name}. Text extraction for this file type is not implemented yet."
+
+    return ""

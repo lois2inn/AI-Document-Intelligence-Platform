@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import DateTime, Integer, String, Text, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
@@ -22,3 +22,11 @@ class DocumentJob(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     document = relationship("Document", back_populates="jobs")
+
+    @property
+    def duration_seconds(self) -> float | None:
+        if not self.started_at:
+            return None
+
+        end_time = self.completed_at or datetime.now(timezone.utc)
+        return (end_time - self.started_at).total_seconds()

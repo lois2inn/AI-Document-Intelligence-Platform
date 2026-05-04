@@ -10,6 +10,7 @@ class DocumentJobRead(BaseModel):
     retry_count: int
     started_at: datetime | None
     completed_at: datetime | None
+    duration_seconds: float | None = None
     created_at: datetime
     
     model_config = {

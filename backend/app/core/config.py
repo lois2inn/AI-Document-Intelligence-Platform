@@ -1,13 +1,35 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field
 
 
 class Settings(BaseSettings):
     app_name: str = "AI Knowledge Tracker API"
-    database_url: str = Field(
-        validation_alias="DATABASE_URL"
+
+    postgres_user: str
+    postgres_password: str
+    postgres_db: str
+    postgres_host: str = "localhost"
+    postgres_port: int = 5432
+
+    upload_dir: str = "uploads"
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
     )
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    @property
+    def database_url(self) -> str:
+        return (
+            f"postgresql+psycopg://{self.postgres_user}:"
+            f"{self.postgres_password}@{self.postgres_host}:"
+            f"{self.postgres_port}/{self.postgres_db}"
+        )
+
+    @property
+    def upload_path(self) -> Path:
+        return Path(self.upload_dir)
 
 settings = Settings()
