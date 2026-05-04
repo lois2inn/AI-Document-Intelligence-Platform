@@ -1,6 +1,6 @@
 # AI Knowledge Tracker / Docs Intelligence Portal
 
-A full-stack AI-powered document intelligence system that ingests, processes, and enables semantic search over documents using modern backend architecture and vector embeddings.
+AI Knowledge Tracker is a full-stack document processing system that ingests documents, processes them through a pipeline, and prepares them for downstream AI use cases such as semantic search and retrieval.
 
 ---
 
@@ -27,6 +27,11 @@ This project solves that by:
 * PostgreSQL + pgvector (vector storage)
 * Background Tasks (document processing pipeline)
 
+**Frontend Stack:**
+
+* React (Next.js)
+* TypeScript
+  
 **Design Patterns:**
 
 * Service Layer Pattern
@@ -47,36 +52,15 @@ This project solves that by:
 
 ---
 
-## Tech Stack
+## Key Features:
 
-* Python
-* FastAPI
-* SQLAlchemy
-* Alembic
-* PostgreSQL 17
-* pgvector
-* Docker
-* NumPy
-
----
-
-## Project Structure
-
-```
-ai-knowledge-tracker/
-├── docker-compose.yml
-├── requirements.txt
-├── .env
-├── alembic/
-├── app/
-│   ├── main.py
-│   ├── models/
-│   ├── services/
-│   ├── repositories/
-│   └── api/
-```
-Environment variables are managed via .env and not committed to version control.
-
+- Document upload & storage
+- Real-time pipeline status tracking
+- Chunk preview
+- Cleaned text preview
+- Reprocess pipeline
+- Job history tracking
+  
 ---
 
 ## Running Locally
@@ -142,20 +126,30 @@ http://127.0.0.1:8000/docs
 
 ---
 
-## Example Workflow
+## Design Decisions
 
-* POST `/documents` → upload document
-* Background task processes text
-* Embeddings stored in vector column
-* Query endpoint performs semantic similarity search
+### Job Model
+- One document → many jobs
+- Each job = one full pipeline run
+
+### Retry Strategy
+- Retries are modeled as **new jobs**
+- No mutation of existing jobs
+
+### Duration Calculation
+- Computed using `@property` in SQLAlchemy
+- Exposed via Pydantic
+
 
 ---
 
 ## Future Enhancements
 
-* LLM-powered Q&A over documents (RAG pipeline)
-* Streaming responses
-* Frontend dashboard (React)
+* Embeddings + vector search (pgvector)
+* Semantic Search UI
+* Concurrent job pipelines
+* Job dependency graph (DAG)
+* Advanced job timeline view
 * Authentication & user-specific knowledge bases
 * Microservice-based ingestion pipeline
 
