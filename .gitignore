@@ -1,5 +1,6 @@
 # MacOS
 .DS_Store
+Thumbs.db
 
 # Alembic
 alembic/pycache/
@@ -12,6 +13,32 @@ alembic/pycache/
 __pycache__/
 *.py[codz]
 *$py.class
+
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Production build
+build/
+
+# Editor files
+.vscode/
+.idea/
+
+# TypeScript
+*.tsbuildinfo
+
+# Coverage / testing
+coverage/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # C extensions
 *.so
@@ -166,6 +193,9 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.env.local
+.env.development
+.env.production
 
 # Spyder project settings
 .spyderproject
