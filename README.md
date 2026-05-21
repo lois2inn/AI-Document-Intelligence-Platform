@@ -52,6 +52,7 @@ This project solves that by:
 5. Semantic search endpoint retrieves similar content
 
 <img src="/img/sample_page.png" width=700/>
+
 ---
 
 ## AI Processing Pipeline
