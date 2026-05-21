@@ -51,6 +51,7 @@ This project solves that by:
 4. Store embeddings in PostgreSQL (pgvector)
 5. Semantic search endpoint retrieves similar content
 
+<img src="/img/sample_page.png" width=700/>
 ---
 
 ## AI Processing Pipeline
