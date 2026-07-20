@@ -1,19 +1,38 @@
-# AI Knowledge Tracker / Docs Intelligence Portal
+# AI-powered Document Intelligence Platform
 
-AI Knowledge Tracker is a full-stack document processing system that ingests documents, processes them through a pipeline, and prepares them for downstream AI use cases such as semantic search and retrieval.
+A full-stack AI application that ingests documents, builds vector embeddings, performs semantic search, and answers questions using Retrieval-Augmented Generation (RAG).
 
 ---
 
 ## Problem Overview
 
-Managing and retrieving knowledge from unstructured documents is inefficient with traditional keyword search.
+Organizations store large amounts of knowledge in documents, notes, and reports. Traditional keyword search struggles to find relevant information when different wording or terminology is used.
 
-This project solves that by:
+AI Knowledge Tracker transforms unstructured text into a searchable knowledge base by:
 
-* Ingesting documents via API
-* Cleaning and processing text asynchronously
-* Generating embeddings
-* Enabling semantic (meaning-based) search using vector similarity
+- Uploading documents and notes
+- Processing content asynchronously through an AI pipeline
+- Generating vector embeddings
+- Performing semantic (meaning-based) search
+- Answering natural language questions using Retrieval-Augmented Generation (RAG)
+
+The project demonstrates how modern AI applications combine backend engineering, vector databases, asynchronous processing, and LLMs into a production-style architecture.
+
+---
+## What This Project Demonstrates
+
+This project showcases production-oriented AI engineering skills across the full stack:
+
+- FastAPI backend development
+- React/Next.js frontend development
+- PostgreSQL and pgvector
+- SQLAlchemy ORM
+- Background processing pipelines
+- Vector embeddings
+- Semantic search
+- Retrieval-Augmented Generation (RAG)
+- Clean architecture (Service, Repository, Provider, Factory patterns)
+- End-to-end AI application development
 
 ---
 
@@ -26,67 +45,159 @@ This project solves that by:
 * Alembic (database migrations)
 * PostgreSQL + pgvector (vector storage)
 * Background Tasks (document processing pipeline)
+* OpenRouter API
+* Pydantic v2
 
 **Frontend Stack:**
 
-* React (Next.js)
+* Next.js
+* React
 * TypeScript
 * Tailwind CSS
+
+**AI Components:**
+
+* OpenRouter Chat Models
+* OpenRouter Embedding Models
+* Provider Factory Pattern
+* Retrieval-Augmented Generation (RAG)
+* Vector Similarity Search
   
 **Design Patterns:**
 
 * Service Layer Pattern
 * Repository Pattern
 * Dependency Injection
+* Provider Pattern
+* Factory Pattern
 
 **High-Level Flow:**
 
-1. User submits document → `/documents`
-2. Document stored with `PENDING` status
-3. Background job processes document:
+```mermaid
+flowchart LR
 
-   * Clean text
-   * Chunk content (overlap-aware)
-   * Generate embeddings
-4. Store embeddings in PostgreSQL (pgvector)
-5. Semantic search endpoint retrieves similar content
+subgraph Frontend
+    UI[Next.js Frontend]
+end
 
-<img src="/img/sample_page.png" width=700/>
+subgraph Backend
+    API[FastAPI API]
+    PIPE[Background Processing Pipeline]
+end
+
+subgraph Database
+    DOCS[(PostgreSQL)]
+    VEC[(pgvector)]
+end
+
+subgraph AI
+    EMB[Embedding Model]
+    CHAT[LLM]
+end
+
+UI --> API
+
+API --> DOCS
+
+API --> PIPE
+
+PIPE --> EMB
+
+EMB --> VEC
+
+API --> VEC
+
+VEC --> CHAT
+
+CHAT --> UI
+```
 
 ---
 
 ## AI Processing Pipeline
 
 ```text
-EXTRACTING
-→ CLEANING
-→ CHUNKING
-→ EMBEDDING
-→ DONE
+EXTRACT
+  |
+CLEAN
+  |
+CHUNK
+  |
+EMBED
+  |
+DONE
 ```
 
+Each pipeline execution creates a new job and records stage-level events for complete observability.
+
 The pipeline supports:
-- observable stage tracking
-- rerun workflows
-- background processing
-- job history
-- event timelines
+
+- Background execution
+- Stage tracking
+- Job history
+- Event timeline
+- Pipeline reruns
+- Failure recovery
+- Progress reporting
 
 ---
 
-## Key Features:
+## Current Features:
 
-- Document upload & storage
-- Real-time pipeline status tracking
-- Chunk preview
-- Cleaned text preview
+**Document Management**
+- Upload text documents
+- Drag-and-drop upload
+- Create notes
+- Document dashboard
+- Document detail view
+- Processing status indicators
+
+**AI Pipeline**
+- Background document processing
+- Text cleaning
+- Overlap-aware chunking
 - Embedding generation
+- pgvector storage
+- Pipeline reruns
+
+**Search**
+- Semantic search
+- Similarity scoring
+- Relevant chunk retrieval
+- Search results linked to source documents
+
+**AI Question Answering**
+- Retrieval-Augmented Generation (RAG)
+- Context-aware responses
+- Source chunk retrieval
+- OpenRouter-powered LLM responses
+
+**Observability**
+- Job history
+- Pipeline stage tracking
+- Event logging
+- Processing banner
+- Status dashboard
 - Embedding progress visualization
-- pgvector integration
-- Reprocess pipeline
-- Job history tracking
-- Stage/event observability
   
+---
+
+## RAG Workflow:
+```text
+User Question
+      │
+Generate Query Embedding
+      │
+Vector Search
+      │
+Retrieve Top-k Chunks
+      │
+Prompt Construction
+      │
+OpenRouter LLM
+      │
+Final Answer
+```
 ---
 
 ## Running Locally
@@ -100,9 +211,10 @@ cd ai-knowledge-tracker
 
 ---
 
-### 2. Setup environment
+### 2. Setup backend environment
 
 ```bash
+cd backend
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -125,17 +237,7 @@ npm install
 docker compose up -d
 ```
 
----
-
-### 5. Enable pgvector
-
-```bash
-docker exec -it ai_tracker_postgres psql -U ai_user -d ai_tracker
-```
-
-```sql
-CREATE EXTENSION IF NOT EXISTS vector;
-```
+The project uses PostgreSQL with the pgvector extension for vector similarity search.
 
 ---
 
@@ -147,16 +249,10 @@ alembic upgrade head
 
 ---
 
-### 7. Start API
+### 7. Start Backend Server
 
 ```bash
 uvicorn app.main:app --reload
-```
-
-Backend API available at:
-
-```text
-http://127.0.0.1:8000/docs
 ```
 
 ---
@@ -175,78 +271,75 @@ Frontend available at:
 ```text
 http://localhost:3000
 ```
-
----
-## pgvector + Embeddings
-
-The system stores vector embeddings directly on document chunks using PostgreSQL + pgvector.
-
-Example embedding column:
-
-```python
-embedding = mapped_column(
-    Vector(1536),
-    nullable=True,
-)
-```
-
-Current embedding model:
-
-```text
-text-embedding-3-small
-```
-
-Embedding dimension:
-
-```text
-1536
-```
-
-This enables:
-- semantic search
-- vector similarity retrieval
-- future RAG workflows
-
 ---
 
 
 ## Design Decisions
 
+### Document Processing
+- Documents are immutable inputs.
+- Processing occurs asynchronously.
+- Long-running work never blocks API requests.
+
 ### Job Model
 
-- One document → many jobs
-- Each job = one full pipeline run
+- One document can have many jobs.
+- Each processing run creates a new job.
+- Historical jobs are preserved.
 
-### Retry Strategy
+### Event Tracking
 
-- Retries are modeled as new jobs
-- Existing job history remains immutable
+Every pipeline stage generates events:
+- Started
+- Completed
+- Failed
+
+This enables complete execution history and debugging.
 
 ### Chunk Strategy
 
-- One active chunk set per document
-- Reprocessing regenerates chunks + embeddings
+- Overlap-aware chunking
+- Previous chunks replaced on reprocessing
+- Embeddings regenerated from current content
 
-### Duration Calculation
+### Provider Abstraction
 
-- Computed using `@property` in SQLAlchemy
-- Exposed via Pydantic
+The application separates AI providers from business logic.
 
+Current implementation:
 
+- OpenRouter Chat Provider
+- OpenRouter Embedding Provider
+
+This design allows future providers (OpenAI, Azure, Ollama, etc.) to be added without changing application logic.
 
 ---
 
 ## Future Enhancements
+**AI**
+* Multi-document conversations
+* Streaming responses
+* Conversation memory
+* Hybrid keyword + semantic search
+* Metadata filtering
+* Citation highlighting
 
-* Semantic Search API
-* Semantic Search UI
-* Retrieval-Augmented Generation (RAG)
-* Vector similarity ranking
-* Concurrent job pipelines
-* Job dependency graph (DAG)
-* Advanced job timeline view
-* Authentication & user-specific knowledge bases
-* Microservice-based ingestion pipeline
+**Platform**
+* PDF ingestion
+* DOCX support
+* URL ingestion
+* OCR support
+* Authentication
+* Multi-user workspaces
+
+**Infrastructure**
+- Celery/RQ workers
+- Message queues
+- Microservice ingestion pipeline
+- Kubernetes deployment
+- CI/CD pipeline
+Cloud deployment
+
 
 ---
 
