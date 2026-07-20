@@ -2,6 +2,8 @@
 
 A full-stack AI application that ingests documents, builds vector embeddings, performs semantic search, and answers questions using Retrieval-Augmented Generation (RAG).
 
+<img src="/img/dashboard.png" width=500/>
+
 ---
 
 ## Problem Overview
@@ -140,6 +142,8 @@ The pipeline supports:
 - Failure recovery
 - Progress reporting
 
+<img src="/img/doc-details.png" width=500/>
+
 ---
 
 ## Current Features:
@@ -151,6 +155,8 @@ The pipeline supports:
 - Document dashboard
 - Document detail view
 - Processing status indicators
+
+<img src="/img/upload.png" width=500/>
 
 **AI Pipeline**
 - Background document processing
@@ -166,11 +172,15 @@ The pipeline supports:
 - Relevant chunk retrieval
 - Search results linked to source documents
 
+<img src="/img/semantic-search.png" width=500/>
+
 **AI Question Answering**
 - Retrieval-Augmented Generation (RAG)
 - Context-aware responses
 - Source chunk retrieval
 - OpenRouter-powered LLM responses
+
+<img src="/img/ask-ai.png" width=500/>
 
 **Observability**
 - Job history
