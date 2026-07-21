@@ -7,6 +7,16 @@
 A full-stack AI application that ingests documents, builds pgvector embeddings, performs semantic search, and answers questions using Retrieval-Augmented Generation (RAG).
 
 ---
+## Project Highlights
+
+- Asynchronous document ingestion and processing
+- Vector embeddings with PostgreSQL + pgvector
+- Semantic search using vector similarity
+- Retrieval-Augmented Generation (RAG) question answering
+- FastAPI backend with Next.js frontend
+- Clean architecture using Service, Repository, Provider, and Factory patterns
+
+---
 
 <details>
 <summary><strong>Table of Contents</strong></summary>
