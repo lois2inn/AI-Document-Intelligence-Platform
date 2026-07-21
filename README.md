@@ -1,9 +1,8 @@
 
 # AI-powered Document Intelligence Platform
 
-A production-oriented AI document intelligence platform that ingests documents, generates pgvector embeddings for semantic search, and answers natural-language questions using Retrieval-Augmented Generation (RAG).
+<img src="/img/banner.png" width=700px/>  
 
-<img src="/img/dashboard.png" width=700px/>
 
 ---
 
