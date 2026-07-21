@@ -20,6 +20,8 @@ AI Knowledge Tracker transforms unstructured text into a searchable knowledge ba
 
 The project demonstrates how modern AI applications combine backend engineering, vector databases, asynchronous processing, and LLMs into a modular, production-oriented architecture.
 
+<img src="/img/dashboard.png" width=700px />
+
 ---
 ## What This Project Demonstrates
 
@@ -74,7 +76,7 @@ This project showcases production-oriented AI engineering skills across the full
 * Provider Pattern
 * Factory Pattern
 
-## High-Level Flow:
+### High-Level Flow:
 
 ```mermaid
 flowchart LR
