@@ -80,46 +80,20 @@ This project showcases production-oriented AI engineering skills across the full
 
 ```mermaid
 flowchart LR
+    UI["Next.js Frontend"] --> API["FastAPI API"]
 
-subgraph Client
-    UI[Next.js Frontend]
-end
+    API --> DB[("PostgreSQL")]
+    API --> PIPE["Background Processing Pipeline"]
 
-subgraph Application
-    API[FastAPI API]
-    PIPE[Background Processing Pipeline]
-    RETRIEVE[Semantic Retrieval Service]
-    ANSWER[Answer Service]
-end
+    PIPE --> EMBED["Embedding Provider"]
+    EMBED --> VECTOR[("pgvector")]
 
-subgraph Storage
-    DB[(PostgreSQL)]
-    VECTOR[(pgvector)]
-end
+    API --> RETRIEVE["Semantic Retrieval Service"]
+    RETRIEVE --> VECTOR
+    RETRIEVE --> ANSWER["Answer Service"]
 
-subgraph AI
-    EMBED[Embedding Provider]
-    LLM[OpenRouter Chat Model]
-end
-
-UI --> API
-API --> DB
-API --> PIPE
-
-PIPE --> EMBED
-EMBED --> PIPE
-PIPE --> VECTOR
-
-API --> RETRIEVE
-RETRIEVE --> EMBED
-RETRIEVE --> VECTOR
-VECTOR --> RETRIEVE
-
-RETRIEVE --> ANSWER
-ANSWER --> LLM
-LLM --> ANSWER
-ANSWER --> API
-API --> UI
+    ANSWER --> LLM["OpenRouter Chat Model"]
+    ANSWER --> UI
 ```
 
 ---
