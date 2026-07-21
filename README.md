@@ -18,7 +18,7 @@ AI Knowledge Tracker transforms unstructured text into a searchable knowledge ba
 - Performing semantic (meaning-based) search
 - Answering natural language questions using Retrieval-Augmented Generation (RAG)
 
-The project demonstrates how modern AI applications combine backend engineering, vector databases, asynchronous processing, and LLMs into a production-style architecture.
+The project demonstrates how modern AI applications combine backend engineering, vector databases, asynchronous processing, and LLMs into a modular, production-oriented architecture.
 
 ---
 ## What This Project Demonstrates
@@ -73,61 +73,62 @@ This project showcases production-oriented AI engineering skills across the full
 * Provider Pattern
 * Factory Pattern
 
-**High-Level Flow:**
+## High-Level Flow:
 
 ```mermaid
 flowchart LR
 
-subgraph Frontend
+subgraph Client
     UI[Next.js Frontend]
 end
 
-subgraph Backend
+subgraph Application
     API[FastAPI API]
     PIPE[Background Processing Pipeline]
+    RETRIEVE[Semantic Retrieval Service]
+    ANSWER[Answer Service]
 end
 
-subgraph Database
-    DOCS[(PostgreSQL)]
-    VEC[(pgvector)]
+subgraph Storage
+    DB[(PostgreSQL)]
+    VECTOR[(pgvector)]
 end
 
 subgraph AI
-    EMB[Embedding Model]
-    CHAT[LLM]
+    EMBED[Embedding Provider]
+    LLM[OpenRouter Chat Model]
 end
 
 UI --> API
-
-API --> DOCS
-
+API --> DB
 API --> PIPE
 
-PIPE --> EMB
+PIPE --> EMBED
+EMBED --> PIPE
+PIPE --> VECTOR
 
-EMB --> VEC
+API --> RETRIEVE
+RETRIEVE --> EMBED
+RETRIEVE --> VECTOR
+VECTOR --> RETRIEVE
 
-API --> VEC
-
-VEC --> CHAT
-
-CHAT --> UI
+RETRIEVE --> ANSWER
+ANSWER --> LLM
+LLM --> ANSWER
+ANSWER --> API
+API --> UI
 ```
 
 ---
 
 ## AI Processing Pipeline
 
-```text
-EXTRACT
-  |
-CLEAN
-  |
-CHUNK
-  |
-EMBED
-  |
-DONE
+```mermaid
+flowchart LR
+    A[Extract] --> B[Clean]
+    B --> C[Chunk]
+    C --> D[Embed]
+    D --> E[Done]
 ```
 
 Each pipeline execution creates a new job and records stage-level events for complete observability.
@@ -146,10 +147,11 @@ The pipeline supports:
 
 ---
 
-## Current Features:
+## Current Features
 
 **Document Management**
-- Upload text documents
+- Upload `.txt` and `.rtf` documents through the current frontend
+- Backend text extraction support for `.txt` and `.rtf`
 - Drag-and-drop upload
 - Create notes
 - Document dashboard
@@ -192,21 +194,15 @@ The pipeline supports:
   
 ---
 
-## RAG Workflow:
-```text
-User Question
-      │
-Generate Query Embedding
-      │
-Vector Search
-      │
-Retrieve Top-k Chunks
-      │
-Prompt Construction
-      │
-OpenRouter LLM
-      │
-Final Answer
+## RAG Workflow
+```mermaid
+flowchart LR
+    A[User Question] --> B[Generate Query Embedding]
+    B --> C[Vector Similarity Search]
+    C --> D[Retrieve Top-k Chunks]
+    D --> E[Construct Context Prompt]
+    E --> F[OpenRouter LLM]
+    F --> G[Context-Aware Answer]
 ```
 ---
 
@@ -214,17 +210,45 @@ Final Answer
 
 ### 1. Clone repo
 
-```
-git clone <your-repo-url>
-cd ai-knowledge-tracker
+```bash
+git clone https://github.com/lois2inn/AI-Document-Intelligence-Platform.git
+cd AI-Document-Intelligence-Platform
 ```
 
 ---
 
-### 2. Setup backend environment
+### 2. Configure environment variables
+
+Create backend/.env 
+```env
+DATABASE_URL=postgresql+psycopg://<postgres_username>:<postgres_password>@localhost:5432/ai_knowledge_tracker
+OPENROUTER_API_KEY=your_openrouter_api_key
+EMBEDDING_MODEL=your_embedding_model
+CHAT_MODEL=your_chat_model
+```
+
+
+Create `frontend/.env.local`:
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+```
+
+---
+
+### 3. Start PostgreSQL (Docker)
 
 ```bash
 cd backend
+docker compose up -d
+```
+This command only works if compose.yaml is inside backend folder. If compose.yaml is at the repository root, run the docker commands there.
+
+---
+
+### 4. Setup backend environment
+
+The current working directory should be backend folder.
+```bash
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -232,26 +256,7 @@ pip install -r requirements.txt
 
 ---
 
-### 3. Setup frontend dependencies
-
-```bash
-cd frontend
-npm install
-```
-
----
-
-### 4. Start PostgreSQL (Docker)
-
-```bash
-docker compose up -d
-```
-
-The project uses PostgreSQL with the pgvector extension for vector similarity search.
-
----
-
-### 6. Run migrations
+### 5. Run migrations
 
 ```bash
 alembic upgrade head
@@ -259,24 +264,30 @@ alembic upgrade head
 
 ---
 
-### 7. Start Backend Server
-
+### 6. Start backend
 ```bash
 uvicorn app.main:app --reload
 ```
 
 ---
 
-### 8. Start frontend
+### 7. Setup frontend dependencies
 
-Open another terminal:
-
+Open another terminal: Go to repository root.
 ```bash
 cd frontend
+npm install
+```
+
+---
+
+### 8. Start frontend
+
+```bash
 npm run dev
 ```
 
-Frontend available at:
+The app will be available at:
 
 ```text
 http://localhost:3000
@@ -287,7 +298,8 @@ http://localhost:3000
 ## Design Decisions
 
 ### Document Processing
-- Documents are immutable inputs.
+- Original document inputs are preserved.
+- Derived text, chunks, and embeddings can be regenerated through reprocessing.
 - Processing occurs asynchronously.
 - Long-running work never blocks API requests.
 
@@ -348,7 +360,7 @@ This design allows future providers (OpenAI, Azure, Ollama, etc.) to be added wi
 - Microservice ingestion pipeline
 - Kubernetes deployment
 - CI/CD pipeline
-Cloud deployment
+- Cloud deployment
 
 
 ---
