@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getDocumentById, getDocumentJobs, getDocumentChunks } from "@/lib/documents";
 import type { Document, DocumentJob } from "@/lib/types";
 
 const FINAL_STATUSES = ["COMPLETED", "FAILED"];
-const ACTIVE_JOB_STATUSES = ["PENDING", "PROCESSING"];
+const ACTIVE_JOB_STATUSES = ["PENDING", "RUNNING", "PROCESSING"];
 
 export function useDocumentDetails(id: string) {
   const [document, setDocument] = useState<Document | null>(null);
@@ -12,7 +12,7 @@ export function useDocumentDetails(id: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  async function fetchDetails() {
+  const fetchDetails = useCallback(async () => {
     try {
       const [docData, jobData, chunksData] = await Promise.all([
         getDocumentById(id),
@@ -25,30 +25,47 @@ export function useDocumentDetails(id: string) {
       setChunks(chunksData);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch document");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to fetch document",
+      );
     } finally {
       setLoading(false);
     }
-  }
+  }, [id]);
+
+
+  const hasActiveJob = jobs.some((job) =>
+    ACTIVE_JOB_STATUSES.includes(job.status),
+  );
+
+  const isProcessing =
+    !document ||
+    !FINAL_STATUSES.includes(document.status) ||
+    hasActiveJob;
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      return;
+    }
 
-    fetchDetails();
+    void fetchDetails();
+  }, [id, fetchDetails]);
 
-    const intervalId = setInterval(() => {
-      const hasActiveJob = jobs.some((j) => ACTIVE_JOB_STATUSES.includes(j.status));
+  useEffect(() => {
+    if (!id || !isProcessing) {
+      return;
+    }
 
-      if (document && FINAL_STATUSES.includes(document.status) && !hasActiveJob) {
-        clearInterval(intervalId);
-        return;
-      }
-
-      fetchDetails();
+    const intervalId = window.setInterval(() => {
+      void fetchDetails();
     }, 3000);
 
-    return () => clearInterval(intervalId);
-  }, [id, document?.status, jobs]);
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [id, isProcessing, fetchDetails]);
 
   return {
     document,
@@ -57,5 +74,6 @@ export function useDocumentDetails(id: string) {
     loading,
     error,
     refetch: fetchDetails,
+    isProcessing,
   };
 }

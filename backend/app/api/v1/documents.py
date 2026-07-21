@@ -1,20 +1,19 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, File, Form, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.db.dependencies import get_db
 from app.models.document import Document
 from app.models.document_job import DocumentJob
 from app.models.document_chunk import DocumentChunk
+from app.models.document_job import JobStage, JobStatus
+from app.pipeline.document_pipeline import run_document_pipeline
+from app.repositories.document_chunk_repository import DocumentChunkRepository
+from app.repositories.job_repository import JobRepository
 from app.schemas.document import DocumentCreate, DocumentRead, DocumentCreateResponse, DocumentJobRead
 from app.schemas.document_chunk import DocumentChunkRead
-from app.services.pipeline_service import process_document_job
 from app.services.document_service import DocumentService
-from app.repositories.chunk_repository import ChunkRepository
-from app.repositories.job_repository import JobRepository
-from app.models.enums import JobStage, JobStatus
-
-from fastapi import File, Form, UploadFile
-from app.services.file_storage_service import save_upload_file
+from app.storage.file_storage import FileStorageService
+from app.validators.upload_validator import validate_upload_file, UnsupportedUploadTypeError
 
 router = APIRouter(prefix="/api/v1/documents", tags=["documents"])
 
@@ -33,13 +32,50 @@ def create_document(
     service = DocumentService(db)
     document, job = service.create_document_with_job(payload)
 
-    background_tasks.add_task(process_document_job, document.id, job.id)
+    background_tasks.add_task(run_document_pipeline, document.id, job.id)
 
     return {
         "document": document,
         "job": job,
     }
 
+@router.post("/upload", response_model=DocumentCreateResponse, status_code=status.HTTP_201_CREATED,)
+def upload_document(
+    background_tasks: BackgroundTasks,
+    title: str = Form(...),
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    try:
+        validate_upload_file(file)
+    except UnsupportedUploadTypeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=str(exc),
+        ) from exc
+
+    file_storage = FileStorageService()
+    original_name, file_path = file_storage.save_upload_file(file)
+
+    try:
+        service = DocumentService(db)
+        document, job = service.create_uploaded_document_with_job(
+            title=title.strip(),
+            file_name=original_name,
+            file_path=file_path,
+            content_type=file.content_type,
+        )
+    except Exception:
+        file_storage.delete_file(file_path)
+        raise
+
+    background_tasks.add_task(run_document_pipeline, document.id, job.id)
+
+    return {
+        "document": document,
+        "job": job,
+    }
+    
 @router.get("/{document_id}", response_model=DocumentRead)
 def get_document(document_id: int, db: Session = Depends(get_db)) -> Document:
     service = DocumentService(db)
@@ -48,7 +84,7 @@ def get_document(document_id: int, db: Session = Depends(get_db)) -> Document:
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
 
-    chunk_repo = ChunkRepository(db)
+    chunk_repo = DocumentChunkRepository(db)
     document.chunk_count = chunk_repo.count_by_document_id(document_id)
 
     return document
@@ -65,7 +101,7 @@ def get_document_chunks(
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
 
-    chunk_repo = ChunkRepository(db)
+    chunk_repo = DocumentChunkRepository(db)
     return chunk_repo.list_by_document_id(document_id)
 
 @router.get("/{document_id}/jobs", response_model=list[DocumentJobRead])
@@ -82,51 +118,61 @@ def get_document_jobs(
     job_repo = JobRepository(db)
     return job_repo.list_by_document_id(document_id)
 
-
-@router.post("/{document_id}/rerun", response_model=DocumentCreateResponse)
-def rerun_document_pipeline(
+@router.post("/{document_id}/reprocess")
+def reprocess_document(
     document_id: int,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
     service = DocumentService(db)
+
     try:
         job = service.reprocess_document(document_id)
     except ValueError as exc:
-        message = str(exc)
-        if "not found" in message.lower():
-            raise HTTPException(status_code=404, detail=message)
-        if "already running" in message.lower():
-            raise HTTPException(status_code=409, detail=message)
-        raise HTTPException(status_code=400, detail=message)
+        raise HTTPException(status_code=400, detail=str(exc))
 
-    background_tasks.add_task(process_document_job, job.document_id, job.id)
+    background_tasks.add_task(run_document_pipeline, document_id, job.id)
 
     return {
-        "document": job.document,
-        "job": job,
+        "message": "Reprocess started",
+        "document_id": document_id,
+        "job_id": job.id,
+        "stage": job.stage,
+        "status": job.status,
     }
 
-@router.post("/upload", response_model=DocumentCreateResponse)
-def upload_document(
-    background_tasks: BackgroundTasks,
-    title: str = Form(...),
-    file: UploadFile = File(...),
+
+@router.get("/{document_id}/embedding-summary")
+def get_document_embedding_summary(
+    document_id: int,
     db: Session = Depends(get_db),
 ):
-    original_name, file_path = save_upload_file(file)
-
     service = DocumentService(db)
-    document, job = service.create_uploaded_document_with_job(
-        title=title,
-        file_name=original_name,
-        file_path=file_path,
-        content_type=file.content_type,
+    document = service.get_document(document_id)
+
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    chunks = (
+        db.query(DocumentChunk)
+        .filter(DocumentChunk.document_id == document_id)
+        .all()
     )
 
-    background_tasks.add_task(process_document_job, document.id, job.id)
+    total_chunks = len(chunks)
+    embedded_chunks = sum(1 for chunk in chunks if chunk.embedding is not None)
 
     return {
-        "document": document,
-        "job": job,
+        "document_id": document_id,
+        "total_chunks": total_chunks,
+        "embedded_chunks": embedded_chunks,
+        "embedding_model": "text-embedding-3-small",
+        "embedding_dimension": 1536,
+        "status": (
+            "NOT_STARTED"
+            if total_chunks == 0
+            else "COMPLETED"
+            if embedded_chunks == total_chunks
+            else "PARTIAL"
+        ),
     }

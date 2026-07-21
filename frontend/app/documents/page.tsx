@@ -1,5 +1,3 @@
-// frontend/app/documents/page.tsx
-
 "use client";
 
 import Link from "next/link";
@@ -26,13 +24,6 @@ export default function DocumentsPage() {
     <main className="p-6">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Documents</h1>
-
-        <Link
-          href="/upload"
-          className="rounded bg-black px-4 py-2 text-white"
-        >
-          Upload Document
-        </Link>
       </div>
 
       {documents.length === 0 ? (

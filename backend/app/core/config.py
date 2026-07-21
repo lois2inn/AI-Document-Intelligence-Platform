@@ -11,8 +11,18 @@ class Settings(BaseSettings):
     postgres_db: str
     postgres_host: str = "localhost"
     postgres_port: int = 5432
+    openrouter_api_key: str
+    openrouter_base_url: str
+
+    openai_api_key: str | None = None
+    openai_base_url: str = "https://api.openai.com/v1"
 
     upload_dir: str = "uploads"
+
+    embedding_provider: str
+    embedding_model: str
+    chat_provider: str
+    chat_model: str
 
     model_config = SettingsConfigDict(
         env_file=".env",

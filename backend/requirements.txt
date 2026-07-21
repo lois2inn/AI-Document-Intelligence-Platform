@@ -7,3 +7,7 @@ pydantic-settings
 python-dotenv
 pgvector
 numpy
+python-multipart
+openai
+striprtf
+pytest

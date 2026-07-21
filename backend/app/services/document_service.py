@@ -1,12 +1,12 @@
 from sqlalchemy.orm import Session
 
-from app.models.document import Document
+from app.models.document import Document, DocumentStatus
 from app.models.document_job import DocumentJob
-from app.models.enums import JobStage, JobStatus
+from app.models.document_job import JobStage, JobStatus
 from app.repositories.document_repository import DocumentRepository
 from app.repositories.job_repository import JobRepository
 from app.schemas.document import DocumentCreate
-from app.services.file_storage_service import save_upload_file
+
 
 
 class DocumentService:
@@ -23,13 +23,13 @@ class DocumentService:
             title=payload.title,
             source_type=payload.source_type,
             raw_text=payload.raw_text,
-            status=JobStatus.PENDING.value,
+            status=DocumentStatus.PENDING.value
         )
         self.document_repo.create(document)
 
         job = DocumentJob(
             document_id=document.id,
-            stage=JobStage.RECEIVED.value,
+            stage=JobStage.EXTRACTING.value,
             status=JobStatus.PENDING.value,
         )
         self.job_repo.create(job)
@@ -53,55 +53,56 @@ class DocumentService:
         file_path: str,
         content_type: str | None,
     ) -> tuple[Document, DocumentJob]:
-        document = Document(
-            title=title,
-            source_type="file",
-            file_name=file_name,
-            file_path=file_path,
-            content_type=content_type,
-            status=JobStatus.PENDING.value,
-        )
+        try:
 
-        self.document_repo.create(document)
+            document = Document(
+                title=title,
+                source_type="file",
+                file_name=file_name,
+                file_path=file_path,
+                content_type=content_type,
+                status=DocumentStatus.PENDING.value
+            )
 
-        job = DocumentJob(
-            document_id=document.id,
-            stage=JobStage.RECEIVED.value,
-            status=JobStatus.PENDING.value,
-        )
+            self.document_repo.create(document)
 
-        self.job_repo.create(job)
+            job = DocumentJob(
+                document_id=document.id,
+                stage=JobStage.EXTRACTING.value,
+                status=JobStatus.PENDING.value,
+            )
 
-        self.db.commit()
-        self.db.refresh(document)
-        self.db.refresh(job)
+            self.job_repo.create(job)
 
-        return document, job
+            self.db.commit()
+            self.db.refresh(document)
+            self.db.refresh(job)
+
+            return document, job
+        except Exception:
+            self.db.rollback()
+            raise
     
     def reprocess_document(self, document_id: int) -> DocumentJob:
         document = self.get_document(document_id)
         if not document:
             raise ValueError(f"Document with id {document_id} not found")
 
-        latest_jobs = self.job_repo.list_by_document_id(document_id)
-        latest_job = latest_jobs[0] if latest_jobs else None
+        jobs = self.job_repo.list_by_document_id(document_id)
+        latest_job = jobs[0] if jobs else None
 
         if latest_job and latest_job.status in [
             JobStatus.PENDING.value,
-            JobStatus.PROCESSING.value,
+            JobStatus.RUNNING.value,
+            "PROCESSING",
         ]:
             raise ValueError(
                 f"Cannot reprocess document {document_id}: a job is already running"
             )
         
-        job = DocumentJob(
-            document_id=document.id,
-            stage=JobStage.RECEIVED.value,
-            status=JobStatus.PENDING.value,
-        )
-        self.job_repo.create(job)
+        job = self.job_repo.create_for_document(document.id)
 
-        document.status = JobStatus.PENDING.value
+        document.status = DocumentStatus.PENDING.value
         
         self.db.commit()
         self.db.refresh(job)
