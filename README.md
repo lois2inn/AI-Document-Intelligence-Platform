@@ -4,6 +4,34 @@
 <img src="/img/banner.png" width=700px/>  
 
 
+A full-stack AI application that ingests documents, builds pgvector embeddings, performs semantic search, and answers questions using Retrieval-Augmented Generation (RAG).
+
+---
+
+<details>
+<summary><strong>Table of Contents</strong></summary>
+
+- [Problem Overview](#problem-overview)
+- [What This Project Demonstrates](#what-this-project-demonstrates)
+- [Architecture](#architecture)
+  - [High-Level Flow](#high-level-flow)
+- [AI Processing Pipeline](#ai-processing-pipeline)
+- [Application Features](#application-features)
+- [RAG Workflow](#rag-workflow)
+- [API Endpoints](#api-endpoints)
+- [Running Locally](#running-locally)
+- [Design Decisions](#design-decisions)
+  - [Document Processing](#document-processing)
+  - [Job Model](#job-model)
+  - [Event Tracking](#event-tracking)
+  - [Chunk Strategy](#chunk-strategy)
+  - [Provider Abstraction](#provider-abstraction)
+- [Future Enhancements](#future-enhancements)
+- [Author](#author)
+
+</details>
+
+
 ---
 
 ## Problem Overview
@@ -182,7 +210,7 @@ flowchart LR
 ```
 ---
 
-## API endpoints
+## API Endpoints
 
 POST /documents/upload
 
