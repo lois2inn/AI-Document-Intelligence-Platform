@@ -37,14 +37,16 @@ export default function HomePage() {
   return (
    <section>
       <div>
-        <h1 className="text-4xl font-bold">AI Knowledge Copilot</h1>
+        <h1 className="text-4xl font-bold">
+          <span className="text-indigo-600">AI</span> Document Intelligence Platform
+        </h1>
+        <p className="mt-2 font-semibold text-gray-700">
+          Transform unstructured knowledge into AI-searchable intelligence.
+        </p>
         <p className="mt-4 max-w-2xl text-gray-600">
-        AI-powered document intelligence platform.
-
-        Upload notes, PDFs, URLs, and documents.
-        Process them into embeddings.
-        Search semantically.
-        Ask questions using AI.
+          Upload documents and notes. Generate embeddings. <span className="text-indigo-600">Semantic Search</span>. Ask AI using Retrieval-Augmented Generation (
+          <span className="text-indigo-600">RAG</span>
+          ).
         </p>
       </div>
 
@@ -86,14 +88,14 @@ export default function HomePage() {
         <div className="mt-4 grid gap-4 md:grid-cols-3">
           <QuickActionCard
             title="Upload Documents"
-            description="Add notes, PDFs, text files, and other knowledge sources."
+            description="Add notes and documents to your knowledge base."
             href="/upload"
             actionLabel="Upload"
           />
 
           <QuickActionCard
             title="Semantic Search"
-            description="Find relevant chunks using vector-based similarity search."
+            description="Find relevant information using vector-based similarity search."
             href="/search"
             actionLabel="Search"
           />

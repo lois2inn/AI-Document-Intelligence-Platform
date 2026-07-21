@@ -17,7 +17,7 @@ export default function Navbar() {
     <header className="border-b bg-white">
        <nav className="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-4 md:flex-row md:items-center md:justify-between">
         <Link href="/" className="text-xl font-bold text-gray-900">
-          AI Knowledge Copilot
+          AI Document Intelligence Platform
         </Link>
 
         <div className="flex flex-wrap gap-2 md:gap-4">
