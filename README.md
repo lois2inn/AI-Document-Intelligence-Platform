@@ -1,8 +1,9 @@
+
 # AI-powered Document Intelligence Platform
 
-A full-stack AI application that ingests documents, builds vector embeddings, performs semantic search, and answers questions using Retrieval-Augmented Generation (RAG).
+A production-oriented AI document intelligence platform that ingests documents, generates pgvector embeddings for semantic search, and answers natural-language questions using Retrieval-Augmented Generation (RAG).
 
-<img src="/img/dashboard.png" width=500/>
+<img src="/img/dashboard.png" width=700px/>
 
 ---
 
@@ -37,6 +38,7 @@ This project showcases production-oriented AI engineering skills across the full
 - End-to-end AI application development
 
 ---
+
 
 ## Architecture
 
@@ -143,22 +145,21 @@ The pipeline supports:
 - Failure recovery
 - Progress reporting
 
-<img src="/img/doc-details.png" width=500/>
+<img src="/img/doc-details.png" width=700px/>
 
 ---
 
-## Current Features
+## Application Features
 
 **Document Management**
-- Upload `.txt` and `.rtf` documents through the current frontend
-- Backend text extraction support for `.txt` and `.rtf`
+- Upload `.txt` and `.rtf` documents
 - Drag-and-drop upload
 - Create notes
 - Document dashboard
 - Document detail view
 - Processing status indicators
 
-<img src="/img/upload.png" width=500/>
+<img src="/img/upload.png" width=700px/>
 
 **AI Pipeline**
 - Background document processing
@@ -174,7 +175,7 @@ The pipeline supports:
 - Relevant chunk retrieval
 - Search results linked to source documents
 
-<img src="/img/semantic-search.png" width=500/>
+<img src="/img/semantic-search.png" width=700px/>
 
 **AI Question Answering**
 - Retrieval-Augmented Generation (RAG)
@@ -182,7 +183,7 @@ The pipeline supports:
 - Source chunk retrieval
 - OpenRouter-powered LLM responses
 
-<img src="/img/ask-ai.png" width=500/>
+<img src="/img/ask-ai.png" width=700px/>
 
 **Observability**
 - Job history
@@ -204,6 +205,20 @@ flowchart LR
     E --> F[OpenRouter LLM]
     F --> G[Context-Aware Answer]
 ```
+---
+
+## API endpoints
+
+POST /documents/upload
+
+POST /documents
+
+GET /documents/{id}
+
+POST /search/semantic
+
+POST /ask
+
 ---
 
 ## Running Locally
