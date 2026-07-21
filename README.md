@@ -226,7 +226,7 @@ OPENROUTER_API_KEY=your_openrouter_api_key
 EMBEDDING_MODEL=your_embedding_model
 CHAT_MODEL=your_chat_model
 ```
-
+A sample .env file is shown in backend/example.env
 
 Create `frontend/.env.local`:
 ```env
