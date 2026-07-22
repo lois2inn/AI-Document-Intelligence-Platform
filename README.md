@@ -15,7 +15,7 @@ A production-oriented full-stack AI application demonstrating document ingestion
 
 - Retrieval-Augmented Generation (RAG)
 - Semantic search using pgvector
-- Asynchronous document ingestion
+- Asynchronous document ingestion and background processing
 - FastAPI + Next.js full-stack architecture
 - PostgreSQL + pgvector embeddings
 - Clean architecture (Service, Repository, Provider, Factory)
@@ -226,15 +226,13 @@ flowchart LR
 
 ## API Endpoints
 
-POST /documents/upload
-
-POST /documents
-
-GET /documents/{id}
-
-POST /search/semantic
-
-POST /ask
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/documents/upload` | Upload a document |
+| POST | `/documents` | Create a text note |
+| GET | `/documents/{id}` | Retrieve document details |
+| POST | `/search/semantic` | Perform semantic search |
+| POST | `/ask` | Ask questions using RAG |
 
 ---
 
