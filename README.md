@@ -1,20 +1,24 @@
 
-# AI-powered Document Intelligence Platform
-
 <img src="/img/banner.png" width=700px/>  
 
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688)
+![Next.js](https://img.shields.io/badge/Next.js-React-black)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-pgvector-blue)
+![OpenRouter](https://img.shields.io/badge/OpenRouter-LLM-orange)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-A full-stack AI application that ingests documents, builds pgvector embeddings, performs semantic search, and answers questions using Retrieval-Augmented Generation (RAG).
+A production-oriented full-stack AI application demonstrating document ingestion, vector search, and Retrieval-Augmented Generation (RAG).
 
 ---
 ## Project Highlights
 
-- Asynchronous document ingestion and processing
-- Vector embeddings with PostgreSQL + pgvector
-- Semantic search using vector similarity
-- Retrieval-Augmented Generation (RAG) question answering
-- FastAPI backend with Next.js frontend
-- Clean architecture using Service, Repository, Provider, and Factory patterns
+- Retrieval-Augmented Generation (RAG)
+- Semantic search using pgvector
+- Asynchronous document ingestion
+- FastAPI + Next.js full-stack architecture
+- PostgreSQL + pgvector embeddings
+- Clean architecture (Service, Repository, Provider, Factory)
 
 ---
 
