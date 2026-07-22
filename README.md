@@ -162,8 +162,6 @@ The pipeline supports:
 - Failure recovery
 - Progress reporting
 
-<img src="/img/doc-details.png" width=700px/>
-
 ---
 
 ## Application Features
@@ -185,6 +183,8 @@ The pipeline supports:
 - Embedding generation
 - pgvector storage
 - Pipeline reruns
+
+<img src="/img/doc-details.png" width=700px/>
 
 **Search**
 - Semantic search
