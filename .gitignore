@@ -9,6 +9,13 @@ alembic/pycache/
 *.pem
 *.key
 
+# Uploads
+/uploads
+
+# SQLite db
+test.db
+app.db
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
